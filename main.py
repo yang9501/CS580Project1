@@ -52,7 +52,16 @@ def neighborhood(n, k, array):
 	return neighborhoodArray
 
 def analyze(n, k, mainArray, neighbors):
-	print(objective(n, k, mainArray))
+	mainArrayObjective = objective(n, k, mainArray)
+	neighborsObjective = []
+	for i in range(len(neighbors)):
+		neighborsObjective.append(objective(n, k, neighbors[i]))
+		print(neighbors[i])
+		print(objective(n,k,neighbors[i]))
+		print("-------------")
+	print(mainArrayObjective)
+	print(neighborsObjective)
+	#THE index of a neighbor array corresponds to the objective index of neighborsObjective.  That is, neighborsObjective[i] == objective(n,k,neighbors[i])
 
 #set k here
 k = 5
@@ -64,3 +73,5 @@ neighbors = neighborhood(n, k, initialStateArray)
 #print (neighbors)
 #####I AM HERE RIGHT NOW.  OBJECTIVE AND NEIGHBOR BOTH WORK, MAYBE NOT FOR ALL EDGE CASES FOR VALUES. NEED TO TEST FOR N.  NEED TO WRITE CODE TO USE OBJECTIVE TO EVALUATE EACH NEIGHBOR
 analyze(n, k, initialStateArray, neighbors)
+
+#TODO: Figure out how to get the value of N.  Watch the sudoku simulated annealing video
