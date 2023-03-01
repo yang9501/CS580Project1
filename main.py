@@ -1,8 +1,5 @@
 import numpy as np
 from copy import copy, deepcopy
-#does k mean k x k array?
-
-#https://stackoverflow.com/questions/903853/how-do-you-extract-a-column-from-a-multi-dimensional-array
 
 def generateArray(n, k):
 	return np.random.randint(0,2, size=(n,k))
@@ -54,6 +51,9 @@ def neighborhood(n, k, array):
 		#print("---------")
 	return neighborhoodArray
 
+def analyze(n, k, mainArray, neighbors):
+	print(objective(n, k, mainArray))
+
 #set k here
 k = 5
 n = 5
@@ -61,6 +61,6 @@ temperature = k
 initialStateArray = generateArray(n, k)
 print (initialStateArray)
 neighbors = neighborhood(n, k, initialStateArray)
-print (neighbors)
+#print (neighbors)
 #####I AM HERE RIGHT NOW.  OBJECTIVE AND NEIGHBOR BOTH WORK, MAYBE NOT FOR ALL EDGE CASES FOR VALUES. NEED TO TEST FOR N.  NEED TO WRITE CODE TO USE OBJECTIVE TO EVALUATE EACH NEIGHBOR
-objective(n, k, initialStateArray)
+analyze(n, k, initialStateArray, neighbors)
