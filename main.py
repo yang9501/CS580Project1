@@ -1,5 +1,7 @@
 import numpy as np
 from copy import copy, deepcopy
+from math import comb
+import math
 
 def generateArray(n, k):
 	return np.random.randint(0,2, size=(n,k))
@@ -10,6 +12,7 @@ def reverseNumber(x):
 	elif x == 1:
 		return 0
 
+#Returns the number of missing combinations for an array
 def objective(n, k, array):
 	missingCombinations = 0
 	for x in range(k) :
@@ -56,22 +59,83 @@ def analyze(n, k, mainArray, neighbors):
 	neighborsObjective = []
 	for i in range(len(neighbors)):
 		neighborsObjective.append(objective(n, k, neighbors[i]))
-		print(neighbors[i])
-		print(objective(n,k,neighbors[i]))
-		print("-------------")
-	print(mainArrayObjective)
-	print(neighborsObjective)
-	#THE index of a neighbor array corresponds to the objective index of neighborsObjective.  That is, neighborsObjective[i] == objective(n,k,neighbors[i])
+		#print(neighbors[i])
+		#print(objective(n,k,neighbors[i]))
+		#print("-------------")
+	#print(mainArrayObjective)
+	#print(neighborsObjective)
+	#THE index of a neighbor array corresponds to the index of neighborsObjective.  
+	#That is, neighborsObjective[i] == objective(n,k,neighbors[i])
+	#pick and return lowest value
+	minimumIndex = neighborsObjective.index(min(neighborsObjective))
+	#print(minimumIndex)
+	return neighbors[minimumIndex]
+
+def simulatedAnnealing(maxIterations, temperature, k, n ,v, t, initialArray, frozenFactor): 
+	currentArray = initialArray
+	stagnationCounter = 0
+
+	#TODO: Figure out how to get the value of N.  Watch the sudoku simulated annealing video
+	print("frozenFactor: " + str(frozenFactor))
+	for i in range(maxIterations):
+		print(currentArray)
+		print(objective(n, k, currentArray))
+		if objective(n, k, currentArray) == 0:
+			print("FOUND OBJECTIVE")
+			return currentArray
+		if temperature == 0:
+			print("TEMPERATURE REACHED")
+			return currentArray
+		if frozenFactor == stagnationCounter:
+			print("FROZEN FACTOR REACHED")
+			return currentArray
+
+		neighbors = neighborhood(n, k, currentArray)
+		#print (neighbors)
+		
+		#retrieve best neighbor array with the lowest objective score
+		bestNeighborArray = analyze(n, k, currentArray, neighbors)
+
+		#Determine whether the neighbor is better than the current
+		deltaE = objective(n, k, bestNeighborArray) - objective(n, k, currentArray)
+		#print("objective currentArray: " + str(objective(n, k, currentArray)))
+		#print("objective bestNeighborArray: " + str(objective(n, k , bestNeighborArray)))
+		#print("deltaE: " + str(deltaE))
+		if deltaE < 0: #If the value of the lowest objective score neighbor is lower than the current score
+			#print("Adopting neighbor, who has lower cost")
+			currentArray = bestNeighborArray
+			stagnationCounter = 0
+		else:
+			print("temperature: " + str(temperature))
+			acceptProbability = np.exp(-deltaE/temperature)   #####THIS IS PROBABLY THE SOURCE OF THE ISSUES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			#print("acceptProbability: " + str(acceptProbability))
+			randomSeed = np.random.uniform(1,0,1)
+			#print("randomSeed: " + str(randomSeed))
+			if randomSeed < acceptProbability:
+				#print("Adopting neighbor through probability")
+				currentArray = bestNeighborArray
+			else:
+				stagnationCounter+=1
+
+		#reduce temperature
+		temperature = temperature * coolingFactor
+		#print("---------------")
+
+	print ("MAX ITERATIONS REACHED")
+	return currentArray
 
 #set k here
 k = 5
 n = 5
-temperature = k
-initialStateArray = generateArray(n, k)
-print (initialStateArray)
-neighbors = neighborhood(n, k, initialStateArray)
-#print (neighbors)
-#####I AM HERE RIGHT NOW.  OBJECTIVE AND NEIGHBOR BOTH WORK, MAYBE NOT FOR ALL EDGE CASES FOR VALUES. NEED TO TEST FOR N.  NEED TO WRITE CODE TO USE OBJECTIVE TO EVALUATE EACH NEIGHBOR
-analyze(n, k, initialStateArray, neighbors)
+v = 2
+t = 2
 
-#TODO: Figure out how to get the value of N.  Watch the sudoku simulated annealing video
+temperature = k
+maxIterations = 100000
+frozenFactor = (v**t) * comb(k, t) #number of iterations threshold where best-so-far objective score has not improved
+coolingFactor = 0.99
+
+initialArray = generateArray(n, k)
+print (initialArray)
+
+print(simulatedAnnealing(maxIterations, temperature, k, n, v, t, initialArray, frozenFactor))
