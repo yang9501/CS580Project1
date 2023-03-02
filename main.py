@@ -64,30 +64,30 @@ def analyze(n, k, mainArray, neighbors):
 		#print("-------------")
 	#print(mainArrayObjective)
 	#print(neighborsObjective)
-	#THE index of a neighbor array corresponds to the index of neighborsObjective.  
+	#The index of a neighbor array corresponds to the index of neighborsObjective.  
 	#That is, neighborsObjective[i] == objective(n,k,neighbors[i])
 	#pick and return lowest value
 	minimumIndex = neighborsObjective.index(min(neighborsObjective))
 	#print(minimumIndex)
 	return neighbors[minimumIndex]
 
-def simulatedAnnealing(maxIterations, temperature, k, n ,v, t, initialArray, frozenFactor): 
+def simulatedAnnealing(maxIterations, temperature, k, n ,v, t, initialArray, frozenFactor, coolingFactor): 
 	currentArray = initialArray
 	stagnationCounter = 0
 
 	#TODO: Figure out how to get the value of N.  Watch the sudoku simulated annealing video
-	print("frozenFactor: " + str(frozenFactor))
+	#print("frozenFactor: " + str(frozenFactor))
 	for i in range(maxIterations):
-		print(currentArray)
-		print(objective(n, k, currentArray))
+		#print(currentArray)
+		#print(objective(n, k, currentArray))
 		if objective(n, k, currentArray) == 0:
-			print("FOUND OBJECTIVE")
+			print("FOUND OBJECTIVE, TOOK " + str(i) + " ITERATIONS")
 			return currentArray
 		if temperature == 0:
-			print("TEMPERATURE REACHED")
+			print("TEMPERATURE REACHED, TOOK " + str(i) + " ITERATIONS")
 			return currentArray
 		if frozenFactor == stagnationCounter:
-			print("FROZEN FACTOR REACHED")
+			print("FROZEN FACTOR REACHED, TOOK " + str(i) + " ITERATIONS")
 			return currentArray
 
 		neighbors = neighborhood(n, k, currentArray)
@@ -106,8 +106,8 @@ def simulatedAnnealing(maxIterations, temperature, k, n ,v, t, initialArray, fro
 			currentArray = bestNeighborArray
 			stagnationCounter = 0
 		else:
-			print("temperature: " + str(temperature))
-			acceptProbability = np.exp(-deltaE/temperature)   #####THIS IS PROBABLY THE SOURCE OF THE ISSUES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			#print("temperature: " + str(temperature))
+			acceptProbability = np.exp(-deltaE/temperature)
 			#print("acceptProbability: " + str(acceptProbability))
 			randomSeed = np.random.uniform(1,0,1)
 			#print("randomSeed: " + str(randomSeed))
@@ -121,21 +121,29 @@ def simulatedAnnealing(maxIterations, temperature, k, n ,v, t, initialArray, fro
 		temperature = temperature * coolingFactor
 		#print("---------------")
 
-	print ("MAX ITERATIONS REACHED")
+	print ("MAX ITERATIONS REACHED, STOPPING")
 	return currentArray
 
-#set k here
-k = 5
-n = 5
-v = 2
-t = 2
 
-temperature = k
-maxIterations = 100000
-frozenFactor = (v**t) * comb(k, t) #number of iterations threshold where best-so-far objective score has not improved
-coolingFactor = 0.99
+def main():
+	#set k here
+	k = 7
+	n = 7 # SEEMS AS THOUGH AS LONG AS N IS GREATER THAN K, THEN A SOLUTION IS FOUND.  OTHERWISE FROZEN CRITERIA IS REACHED IF N <= K
+	v = 2
+	t = 2
+	coolingFactor = 0.99
+	maxIterations = 100000
+	
+	
+	temperature = k
+	frozenFactor = (v**t) * comb(k, t) #number of iterations threshold where best-so-far objective score has not improved
+	for i in range(30):
+		print("ITERATION: " + str(i + 1))
+		initialArray = generateArray(n, k)
+		#print (initialArray)
+		solutionArray = simulatedAnnealing(maxIterations, temperature, k, n, v, t, initialArray, frozenFactor, coolingFactor)
+		print(solutionArray)
+		print("------------------")
 
-initialArray = generateArray(n, k)
-print (initialArray)
-
-print(simulatedAnnealing(maxIterations, temperature, k, n, v, t, initialArray, frozenFactor))
+if __name__ == "__main__":
+	main()
